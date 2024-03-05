@@ -5,6 +5,7 @@ import Table from "react-bootstrap/Table";
 import { Button, Form } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import { useState } from "react";
+import { toast } from "react-toastify";
 import axios from "axios";
 import { Baseurl, showMsg } from "../../../../../Baseurl";
 
@@ -12,6 +13,7 @@ const Category = () => {
   const [modalShow, setModalShow] = React.useState(false);
   const [edit, setEdit] = useState(false);
   const [data, setData] = useState([]);
+  const [CategoryId, setCategoryId] = useState('')
 
   const fetchData = async () => {
     try {
@@ -34,6 +36,25 @@ const Category = () => {
   function MyVerticallyCenteredModal(props) {
     const [image, setImage] = useState("");
     const [desc, setDesc] = useState("");
+
+
+    useEffect(() => {
+      const fetchCategorysDetails = async () => {
+        try {
+          const response = await axios.get(`${Baseurl}/api/admin/categories/${CategoryId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          const { name, image } = response.data.data;
+          setImage(image);
+          setDesc(name);
+        } catch (error) {
+          console.error('Error fetching Category details:', error);
+        }
+      };
+      fetchCategorysDetails();
+    }, [CategoryId]);
 
     const fd = new FormData();
     fd.append("image", image);
@@ -58,6 +79,23 @@ const Category = () => {
         console.log(e);
       }
     };
+    const handlePutRequest = async (e) => {
+      e.preventDefault();
+      try {
+        const response = await axios.put(`${Baseurl}api/admin/categories/${CategoryId}`, fd, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        // toast.success("User Updated successfully");
+        showMsg("Success", "Category Updated", "success");
+        setModalShow(false);
+        fetchData();
+      } catch (error) {
+        console.error('Error to updating Category:', error)
+        toast.error("Error to updating Category")
+      }
+    }
     return (
       <Modal
         {...props}
@@ -71,7 +109,17 @@ const Category = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={postData}>
+          {image && (
+            <div>
+              <img
+                src={image instanceof File ? URL.createObjectURL(image) : image}
+                alt="Category Preview"
+                style={{ width: "100px" }}
+              />
+            </div>
+          )}
+
+          <Form onSubmit={edit ? handlePutRequest : postData}>
             <Form.Group className="mb-3">
               <Form.Label>Image</Form.Label>
               <Form.Control
@@ -85,17 +133,18 @@ const Category = () => {
               <Form.Control
                 type="text"
                 placeholder="category name ..."
-                required
+                value={desc}
                 onChange={(e) => setDesc(e.target.value)}
               />
             </Form.Group>
 
             <Button variant="outline-success" type="submit">
-              Submit
+              {edit ? "Update" : "Submit"}
             </Button>
           </Form>
         </Modal.Body>
       </Modal>
+
     );
   }
 
@@ -131,6 +180,7 @@ const Category = () => {
             onClick={() => {
               setEdit(false);
               setModalShow(true);
+              setCategoryId(null)
             }}
           >
             Create New
@@ -157,10 +207,18 @@ const Category = () => {
                     />
                   </td>
                   <td> {i.name} </td>
-                  <td>
+                  <td className="user121">
                     <i
                       className="fa-solid fa-trash"
                       onClick={() => deleteData(i._id)}
+                    ></i>
+                    <i
+                      className="fa-solid fa-edit"
+                      onClick={() => {
+                        setCategoryId(i._id);
+                        setModalShow(true);
+                        setEdit(true)
+                      }}
                     ></i>
                   </td>
                 </tr>

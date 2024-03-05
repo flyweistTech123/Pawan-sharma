@@ -4,6 +4,7 @@ import HOC from "../../layout/HOC";
 import Table from "react-bootstrap/Table";
 import { Button, FloatingLabel, Form, Modal } from "react-bootstrap";
 import axios from "axios";
+import { toast } from "react-toastify";
 import { Baseurl, showMsg } from "../../../../../Baseurl";
 import { FaBaby } from "react-icons/fa";
 
@@ -113,6 +114,7 @@ const Product = () => {
         props.onHide();
         fetchData();
       } catch (e) {
+        toast.error("Error to Product Created")
         console.log(e);
       }
     };
@@ -146,7 +148,7 @@ const Product = () => {
       >
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">
-            {edit ? "Update" : "Add Product"}
+            {edit ? "Update Product" : "Add Product"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -384,14 +386,14 @@ const Product = () => {
           <span className="tracking-widest text-slate-900 font-semibold uppercase ">
             All Products
           </span>
-          {/* <button
+          <button
             onClick={() => {
               setEdit(false);
               setModalShow(true);
             }}
           >
             Add Product
-          </button> */}
+          </button>
         </div>
 
         <div className="table-component">
@@ -410,7 +412,7 @@ const Product = () => {
                 <th>Stock</th>
                 <th>Number of Reviews</th>
                 <th>Color Available</th>
-                {/* <th>Actions</th> */}
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -445,20 +447,20 @@ const Product = () => {
                       <p key={index}>{i}</p>
                     ))}{" "}
                   </td>
-                  {/* <td>
+                  <td className="user121">
                     <i
                       class="fa-solid fa-trash"
                       onClick={() => deleteData(i._id)}
                     ></i>
                     <i
-                      className="fa-solid fa-pen-to-square"
+                      className="fa-solid fa-edit"
                       onClick={() => {
                         setId(i._id);
                         setEdit(true);
                         setModalShow(true);
                       }}
                     ></i>
-                  </td> */}
+                  </td>
                 </tr>
               ))}
             </tbody>
