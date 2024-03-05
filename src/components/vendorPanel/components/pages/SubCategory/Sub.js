@@ -5,6 +5,7 @@ import Table from "react-bootstrap/Table";
 import { Button, Form } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import { useState } from "react";
+import { toast } from "react-toastify";
 import axios from "axios";
 import { Baseurl, showMsg } from "../../../../../Baseurl";
 
@@ -12,6 +13,10 @@ const Sub = () => {
   const [modalShow, setModalShow] = React.useState(false);
   const [edit, setEdit] = useState(false);
   const [data, setData] = useState([]);
+  const [image1, setImage1] = useState("");
+  const [desc1, setDesc1] = useState("");
+  const [category1, setCategory1] = useState("");
+  const [CategoryId, setCategoryId] = useState('')
 
   const fetchData = async () => {
     try {
@@ -37,6 +42,31 @@ const Sub = () => {
     const [category, setCategory] = useState("");
     const [categoryP, setP] = useState([]);
 
+
+    useEffect(() => {
+      const fetchSubCategorysDetails = async () => {
+        try {
+          const response = await axios.get(`${Baseurl}/api/admin/subcategories/${CategoryId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          console.log(response);
+          const { name, image, category } = response.data.data;
+          setImage(image);
+          setDesc(name);
+          setCategory(category)
+        } catch (error) {
+          console.error('Error fetching sub Category details:', error);
+        }
+      };
+      fetchSubCategorysDetails();
+    }, [CategoryId]);
+  
+  
+
+  
+
     const fd = new FormData();
     fd.append("image", image);
     fd.append("name", desc);
@@ -61,6 +91,23 @@ const Sub = () => {
         console.log(e);
       }
     };
+    const handlePutRequest = async (e) => {
+      e.preventDefault();
+      try {
+        const response = await axios.put(`${Baseurl}api/admin/subcategories/${CategoryId}`, fd, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        // toast.success("User Updated successfully");
+        showMsg("Success", "Sub Category Updated", "success");
+        setModalShow(false);
+        fetchData();
+      } catch (error) {
+        console.error('Error to updating Sub Category:', error)
+        toast.error("Error to updating Sub Category")
+      }
+    }
 
     const fetchCategory = async () => {
       try {
@@ -77,6 +124,9 @@ const Sub = () => {
 
     useEffect(() => {
       if (props.show === true) {
+        setDesc(desc1)
+        setImage(image1)
+        setCategory(category1)
         fetchCategory();
       }
     }, [props]);
@@ -90,11 +140,20 @@ const Sub = () => {
       >
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">
-            {edit ? "Edit Category" : "Add Category"}
+            {edit ? "Edit Sub Category" : "Add Sub Category"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={postData}>
+          {image && (
+            <div>
+              <img
+                src={image instanceof File ? URL.createObjectURL(image) : image}
+                alt="Category Preview"
+                style={{ width: "100px" }}
+              />
+            </div>
+          )}
+          <Form onSubmit={edit ? handlePutRequest : postData}>
             <Form.Group className="mb-3">
               <Form.Label>Image</Form.Label>
               <Form.Control
@@ -106,6 +165,7 @@ const Sub = () => {
             <Form.Group className="mb-3">
               <Form.Label>Sub Category</Form.Label>
               <Form.Select
+                aria-selected={category}
                 aria-label="Default select example"
                 onChange={(e) => setCategory(e.target.value)}
               >
@@ -125,12 +185,13 @@ const Sub = () => {
                 type="text"
                 placeholder="Sub category name ..."
                 required
+                value={desc}
                 onChange={(e) => setDesc(e.target.value)}
               />
             </Form.Group>
 
             <Button variant="outline-success" type="submit">
-              Submit
+              {edit ? "Update" : "Submit"}
             </Button>
           </Form>
         </Modal.Body>
@@ -170,6 +231,10 @@ const Sub = () => {
             onClick={() => {
               setEdit(false);
               setModalShow(true);
+              setCategoryId(null)
+              setDesc1(null)
+              setImage1(null)
+              setCategory1(null)
             }}
           >
             Create New
@@ -196,10 +261,21 @@ const Sub = () => {
                     />
                   </td>
                   <td> {i.name} </td>
-                  <td>
+                  <td className="user121">
                     <i
                       className="fa-solid fa-trash"
                       onClick={() => deleteData(i._id)}
+                    ></i>
+                    <i
+                      className="fa-solid fa-edit"
+                      onClick={() => {
+                        setCategoryId(i._id);
+                        setModalShow(true);
+                        setEdit(true)
+                        setDesc1(i.name)
+                        setImage1(i.image)
+                        setCategory1(i.category)
+                      }}
                     ></i>
                   </td>
                 </tr>

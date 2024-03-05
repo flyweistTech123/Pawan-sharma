@@ -13,10 +13,14 @@ const Product = () => {
   const [data, setData] = useState([]);
   const [id, setId] = useState("");
   const [edit, setEdit] = useState(false);
+  const [productId, setProductId] = useState('')
 
   function MyVerticallyCenteredModal(props) {
     const [categoryP, setP] = useState([]);
     const [subCategory, setSubCategory] = useState([]);
+
+
+
 
     const fetchCategory = async () => {
       try {
@@ -44,17 +48,21 @@ const Product = () => {
       }
     };
 
+
     useEffect(() => {
       if (props.show === true) {
         fetchCategory();
         fetchSubCategory();
+        fetchSubCategorysDetails();
       }
     }, [props]);
 
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [subCategoryId, setSubCategoryId] = useState("");
-    const [price, setPrice] = useState("");
+    const [originalprice, setOriginalPrice] = useState("");
+    const [discount, setDiscount] = useState("");
+    const [discountActive, setDiscountActive] = useState('')
     // const [ratings, setRating] = useState("");
     const [size, setSize] = useState("");
     const [colors, setColor] = useState("");
@@ -63,6 +71,31 @@ const Product = () => {
     const [image, setImage] = useState("");
     const [arr, setArr] = useState([]);
     const [colorArray, setColorArray] = useState([]);
+
+    const fetchSubCategorysDetails = async () => {
+      try {
+        const response = await axios.get(`${Baseurl}/api/admin/products/${productId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        console.log(response);
+        const { productName, description, originalPrice, discountActive, discount, categoryId, subCategoryId, color, size, stock, image } = response.data.data;
+        setName(productName);
+        setDescription(description);
+        setOriginalPrice(originalPrice);
+        setDiscount(discount)
+        setDiscountActive(discountActive);
+        setSubCategoryId(subCategoryId);
+        setCategory(categoryId)
+        setColor(color);
+        setSize(size);
+        setStock(stock);
+        setImage(image);
+      } catch (error) {
+        console.error('Error fetching Product details:', error);
+      }
+    };
 
     const arrSelector = () => {
       setArr((prev) => [...prev, size]);
@@ -85,7 +118,9 @@ const Product = () => {
     const fd = new FormData();
     fd.append("productName", name);
     fd.append("description", description);
-    fd.append("price", price);
+    fd.append("originalPrice", originalprice);
+    fd.append("discount", discount);
+    fd.append("discountActive", discountActive);
     fd.append("stock", Stock);
     fd.append("categoryId", category);
     fd.append("subCategoryId", subCategoryId);
@@ -93,14 +128,16 @@ const Product = () => {
       fd.append("image", img);
     });
 
-    console.log(arr, "arr size of data");
 
     for (let i = 0; i < arr.length; i++) {
-      fd.append("size[]", arr[i]);
+      fd.append("size", arr[i]);
     }
+    fd.append('size', arr)
     for (let i = 0; i < colorArray.length; i++) {
-      fd.append("color[]", colorArray[i]);
+      fd.append("color", colorArray[i]);
     }
+
+
 
     const postData = async (e) => {
       e.preventDefault();
@@ -114,30 +151,43 @@ const Product = () => {
         props.onHide();
         fetchData();
       } catch (e) {
-        toast.error("Error to Product Created")
+        toast.error("Error to Add Product")
         console.log(e);
       }
     };
 
-    const putHandler = async (e) => {
+    const handlePutRequest = async (e) => {
       e.preventDefault();
       try {
-        const { data } = await axios.put(
-          `${Baseurl}api/admin/products/${id}`,
-          fd,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        showMsg("Success", "Product Updated !", "success");
+        const formData = new FormData();
+
+        // Append all fields including color and size arrays
+        formData.append("productName", name);
+        formData.append("description", description);
+        formData.append("originalPrice", originalprice);
+        formData.append("discount", discount);
+        formData.append("discountActive", discountActive);
+        formData.append("stock", Stock);
+        formData.append("categoryId", category);
+        formData.append("subCategoryId", subCategoryId);
+        Array.from(image).forEach((img) => {
+          formData.append("image", img);
+        });
+        const response = await axios.put(`${Baseurl}api/admin/products/${productId}`, formData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        showMsg("Success", "Product Updated", "success");
         props.onHide();
         fetchData();
-      } catch (e) {
-        console.log(e);
+      } catch (error) {
+        console.error('Error updating Product:', error);
+        toast.error("Error updating Product");
       }
-    };
+    }
+
+
 
     return (
       <Modal
@@ -152,7 +202,19 @@ const Product = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={edit ? putHandler : postData}>
+          {image && image.length > 0 && (
+            <div>
+              {Array.from(image).map((file, index) => (
+                <img
+                  key={index}
+                  src={file instanceof File ? URL.createObjectURL(file) : file}
+                  alt={`Image Preview ${index}`}
+                  style={{ width: "100px", marginRight: "10px" }}
+                />
+              ))}
+            </div>
+          )}
+          <Form onSubmit={edit ? handlePutRequest : postData}>
             <Form.Group className="mb-3">
               <Form.Label>Product Image</Form.Label>
               <Form.Control
@@ -165,6 +227,7 @@ const Product = () => {
               <Form.Label>Product Name</Form.Label>
               <Form.Control
                 type="text"
+                value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </Form.Group>
@@ -177,23 +240,55 @@ const Product = () => {
                 <Form.Control
                   as="textarea"
                   placeholder="Leave a comment here"
+                  value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </FloatingLabel>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Price</Form.Label>
+              <Form.Label>Original Price</Form.Label>
               <Form.Control
                 type="number"
                 min={0}
-                onChange={(e) => setPrice(e.target.value)}
+                value={originalprice}
+                onChange={(e) => setOriginalPrice(e.target.value)}
               />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Discount</Form.Label>
+              <Form.Control
+                type="number"
+                min={0}
+                value={discount}
+                onChange={(e) => setDiscount(e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Discount Status</Form.Label>
+              <div>
+                <Form.Check
+                  type="radio"
+                  label="Active"
+                  name="status"
+                  checked={discountActive}
+                  onChange={() => setDiscountActive(true)}
+                />
+                <Form.Check
+                  type="radio"
+                  label="Deactive"
+                  name="status"
+                  checked={!discountActive}
+                  onChange={() => setDiscountActive(false)}
+                />
+              </div>
             </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Label>Category</Form.Label>
               <Form.Select
                 aria-label="Default select example"
+                value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
                 <option>Open this select menu</option>
@@ -209,6 +304,7 @@ const Product = () => {
               <Form.Label>Sub Category</Form.Label>
               <Form.Select
                 aria-label="Sub category"
+                value={subCategoryId}
                 onChange={(e) => setSubCategoryId(e.target.value)}
               >
                 <option>Open this select menu</option>
@@ -333,7 +429,7 @@ const Product = () => {
             </Form.Group>
 
             <Button variant="outline-success" type="submit">
-              Submit
+              {edit ? "Update" : "Submit"}
             </Button>
           </Form>
         </Modal.Body>
@@ -390,6 +486,7 @@ const Product = () => {
             onClick={() => {
               setEdit(false);
               setModalShow(true);
+              setProductId(null)
             }}
           >
             Add Product
@@ -458,6 +555,7 @@ const Product = () => {
                         setId(i._id);
                         setEdit(true);
                         setModalShow(true);
+                        setProductId(i._id)
                       }}
                     ></i>
                   </td>

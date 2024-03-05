@@ -6,7 +6,7 @@ import HOC from "../../layout/HOC";
 import Table from "react-bootstrap/Table";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
-import { FloatingLabel } from "react-bootstrap";
+import { FloatingLabel, FormControl } from "react-bootstrap";
 import { AiFillDelete } from "react-icons/ai";
 import axios from "axios";
 import { Baseurl, showMsg, Auth } from "../../../../../Baseurl";
@@ -53,7 +53,11 @@ const MSG = () => {
 
   function MyVerticallyCenteredModal(props) {
     const [message, setMessage] = useState("");
+    const [total, setTotal] = useState("");
+    const [title, setTitle] = useState("");
+    const [sendTo, setSendTo] = useState(''); // Default value set to 'User'
     const [userId, setUserId] = useState("");
+    const [user, setUser] = useState([]);
 
     const postData = async (e) => {
       e.preventDefault();
@@ -61,8 +65,11 @@ const MSG = () => {
         const { data } = await axios.post(
           `${Baseurl}api/admin/notifications`,
           {
-            recipient: userId,
+            _id: userId,
             content: message,
+            sendTo: sendTo,
+            total: total,
+            title: title,
           },
           {
             headers: {
@@ -75,10 +82,10 @@ const MSG = () => {
         fetchData();
       } catch (e) {
         console.log(e);
+        toast.error("Error to Create Notification")
       }
     };
 
-    const [user, setUser] = useState([]);
     const fetchData = async () => {
       try {
         const { data } = await axios.get(`${Baseurl}api/admin/users`, {
@@ -86,7 +93,6 @@ const MSG = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-        console.log("user data", data.data);
         setUser(data.users);
       } catch (err) {
         console.log(err);
@@ -114,29 +120,81 @@ const MSG = () => {
         <Modal.Body>
           <Form onSubmit={postData}>
             <Form.Group className="mb-3">
-              <FloatingLabel controlId="floatingTextarea2" label="Notification">
+              <Form.Label>Send To</Form.Label>
+              <div>
+                <Form.Check
+                  type="radio"
+                  label="ALL"
+                  name="status"
+                  value="ALL"
+                  checked={total === "ALL"}
+                  onChange={(e) => setTotal(e.target.value)}
+                />
+                <Form.Check
+                  type="radio"
+                  label="SINGLE"
+                  name="status"
+                  value="SINGLE"
+                  checked={total === "SINGLE"}
+                  onChange={(e) => setTotal(e.target.value)}
+                />
+              </div>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Type</Form.Label>
+              <Form.Select
+                aria-label="Default select example"
+                onChange={(e) => setSendTo(e.target.value)}
+                value={sendTo}
+              >
+                <option>Select the Type of user</option>
+                {["Admin", "User", "Vendor"].map((type, index) => (
+                  <option value={type} key={index}>
+                    {type}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+
+            {total === "SINGLE" && (
+              <Form.Group className="mb-3">
+                <Form.Label>Users</Form.Label>
+                <Form.Select
+                  aria-label="Default select example"
+                  onChange={(e) => setUserId(e.target.value)}
+                  value={userId}
+                >
+                  <option>Select the individual User</option>
+                  {user?.map((i, index) => (
+                    <option value={i._id} key={index}>
+                      {" "}
+                      {i.userName}{" "}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            )}
+
+            <Form.Group className="mb-3">
+              <Form.Label>Notification Title</Form.Label>
+              <FormControl
+                as="input"
+                placeholder="Enter the Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </Form.Group>
+
+
+            <Form.Group className="mb-3">
+              <FloatingLabel controlId="floatingTextarea2" label="Enter Notification content">
                 <Form.Control
                   as="textarea"
-                  placeholder="Leave a comment here"
+                  placeholder="Enter the Notification"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
               </FloatingLabel>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>User </Form.Label>
-              <Form.Select
-                aria-label="Default select example"
-                onChange={(e) => setUserId(e.target.value)}
-              >
-                <option>Open this select menu</option>
-                {user?.map((i, index) => (
-                  <option value={i._id} key={index}>
-                    {" "}
-                    {i.userName}{" "}
-                  </option>
-                ))}
-              </Form.Select>
             </Form.Group>
 
             <Button variant="outline-success" type="submit">
@@ -147,6 +205,7 @@ const MSG = () => {
       </Modal>
     );
   }
+
 
   return (
     <>
@@ -175,15 +234,18 @@ const MSG = () => {
             <thead>
               <tr>
                 <th>User ID/ Recipient</th>
+                <th>Title</th>
                 <th>Content</th>
                 <th>Status</th>
                 <th>CreatedAt</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {data?.map((i, index) => (
                 <tr key={index}>
                   <td>{i.recipient}</td>
+                  <td>{i.title}</td>
                   <td>{i.content}</td>
                   <td>{i.status}</td>
                   <td> {i.createdAt.slice(0, 10)} </td>
