@@ -138,7 +138,7 @@ const Payment = () => {
       <section>
         <div className="pb-4 w-full flex justify-between items-center Heading_Container">
           <span className="tracking-widest text-slate-900 font-semibold uppercase ">
-            All Payment
+            All Payments
           </span>
         </div>
 
@@ -146,45 +146,33 @@ const Payment = () => {
           <Table>
             <thead>
               <tr>
-                <th> User</th>
-                <th> Order</th>
+                <th>User</th>
+                <th>Order</th>
                 <th>Amount</th>
                 <th>Payment Method</th>
+                <th>Payment Status</th>
                 <th>Download Status</th>
-                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {data?.map((i, index) => (
+              {data?.map((item, index) => (
                 <tr key={index}>
+                  <td>{item.order.user ? item.order.user : "N/A"}</td>
                   <td>
-                    {i.user === (undefined || null) ? "" : i.user?.userName}
+                    {/* Displaying order details */}
+                    {item.order.products.map((product, idx) => (
+                      <div key={idx}>
+                        {product.product}
+                      </div>
+                    ))}
                   </td>
+                  <td>{item.amount}</td>
+                  <td>{item.paymentMethod}</td>
+                  <td>{item.order.paymentStatus}</td>
                   <td>
-                    {i.order === (undefined || null)
-                      ? ""
-                      : i.order?.paymentStatus}
-                  </td>
-                  <td> {i.amount} </td>
-                  <td>{i.paymentMethod}</td>
-                  <td>
-                    <Button onClick={() => handleDownloadStatus(i.pdfLink)}>
+                    <Button onClick={() => handleDownloadStatus(item.pdfLink)}>
                       Download Invoice
                     </Button>
-                  </td>
-                  <td>
-                    <i
-                      className="fa-solid fa-trash"
-                      onClick={() => deleteData(i._id)}
-                    ></i>
-                    {/* <i
-                      className="fa-solid fa-pen-to-square"
-                      onClick={() => {
-                        setId(i._id);
-                        setEdit(true);
-                        setModalShow(true);
-                      }}
-                    ></i> */}
                   </td>
                 </tr>
               ))}
@@ -192,6 +180,7 @@ const Payment = () => {
           </Table>
         </div>
       </section>
+
     </>
   );
 };

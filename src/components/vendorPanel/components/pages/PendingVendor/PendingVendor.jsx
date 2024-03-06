@@ -38,7 +38,7 @@ const PendingVendor = () => {
   function MyVerticallyCenteredModal(props) {
     const [status, setStatus] = useState("");
 
-    const handlePost = async (e) => {
+    const handlePut = async (e) => {
       e.preventDefault();
       try {
         await axios.put(
@@ -54,11 +54,9 @@ const PendingVendor = () => {
         );
         fetchData();
         props.onHide();
-        toast.error("vendor Update is successful", {
-          position: "top-right",
-        });
+        showMsg("Success", "Vendor Status Updated", "success")
       } catch (error) {
-        toast.error(error?.response?.data?.message);
+        toast.error("Error to Update Vendor Status");
       }
     };
     return (
@@ -72,12 +70,30 @@ const PendingVendor = () => {
           <Modal.Title id="contained-modal-title-vcenter">Status</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handlePost}>
-            <Form.Select onChange={(e) => setStatus(e.target.value)}>
+          <Form onSubmit={handlePut}>
+            <Form.Group className="mb-3">
+              <div style={{display:"flex", gap:"20px"}}>
+                <Form.Check
+                  type="radio"
+                  label="Active"
+                  name="status"
+                  checked={status}
+                  onChange={() => setStatus(true)}
+                />
+                <Form.Check
+                  type="radio"
+                  label="Deactive"
+                  name="status"
+                  checked={!status}
+                  onChange={() => setStatus(false)}
+                />
+              </div>
+            </Form.Group>
+            {/* <Form.Select onChange={(e) => setStatus(e.target.value)}>
               <option>Open this select menu</option>
               <option value={true}>True</option>
               <option value={false}>False</option>
-            </Form.Select>
+            </Form.Select> */}
 
             <Modal.Footer>
               <Button type="submit">Submit</Button>
@@ -128,13 +144,10 @@ const PendingVendor = () => {
                   <td>{i.isVendorVerified ? "True" : "False"}</td>
                   <td>
                     <div onClick={() => handle_updateVendor(i._id)}>
-                      <FaEye
-                        style={{
-                          width: "30px",
-                          height: "30px",
-                          cursor: "pointer",
-                        }}
-                      />
+                      <i
+                        className="fa-solid fa-edit"
+                        style={{ cursor: 'pointer' }}
+                      ></i>
                     </div>
                   </td>
                 </tr>

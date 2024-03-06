@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { Baseurl, showMsg } from "../../../../../Baseurl";
 import { FaBaby } from "react-icons/fa";
 
-const Product = () => {
+const ApprovedProduct = () => {
   const [modalShow, setModalShow] = React.useState(false);
   const [data, setData] = useState([]);
   const [id, setId] = useState("");
@@ -439,12 +439,12 @@ const Product = () => {
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get(`${Baseurl}api/admin/products`, {
+      const { data } = await axios.get(`${Baseurl}api/admin/product/approved-vendors`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setData(data.products);
+      setData(data.data);
     } catch (e) {
       console.log(e);
     }
@@ -480,7 +480,7 @@ const Product = () => {
       <section>
         <div className="pb-4  w-full flex justify-between items-center Heading_Container">
           <span className="tracking-widest text-slate-900 font-semibold uppercase ">
-            All Products
+            All Approved Products
           </span>
           <button
             onClick={() => {
@@ -509,6 +509,7 @@ const Product = () => {
                 <th>Stock</th>
                 <th>Number of Reviews</th>
                 <th>Color Available</th>
+                {/* <th>isProductVerified</th> */}
                 <th>Actions</th>
               </tr>
             </thead>
@@ -544,6 +545,7 @@ const Product = () => {
                       <p key={index}>{i}</p>
                     ))}{" "}
                   </td>
+                  {/* <td>{i.isProductVerified ? "Approved" : "Pending"}</td> */}
                   <td className="user121">
                     <i
                       class="fa-solid fa-trash"
@@ -569,4 +571,4 @@ const Product = () => {
   );
 };
 
-export default HOC(Product);
+export default HOC(ApprovedProduct);

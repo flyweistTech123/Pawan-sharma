@@ -10,7 +10,10 @@ import { BsFillChatDotsFill } from "react-icons/bs";
 import { TbDiscount } from "react-icons/tb";
 import { AiFillMessage } from "react-icons/ai";
 import { FiImage } from "react-icons/fi";
+import { RiSecurePaymentLine } from "react-icons/ri";
 import { FaProductHunt, FaUserCircle } from "react-icons/fa";
+
+
 
 const Sidebar = ({ hamb, setHamb }) => {
   const navigate = useNavigate();
@@ -63,8 +66,13 @@ const Sidebar = ({ hamb, setHamb }) => {
     },
     {
       icon: <FaProductHunt className="text-xl mr-3 rounded-full " />,
-      link: "/product",
-      name: "Products",
+      link: "/pendingproduct",
+      name: "Pending Products"
+    },
+    {
+      icon: <FaProductHunt className="text-xl mr-3 rounded-full " />,
+      link: "/approvegproduct",
+      name: "Approve Products",
     },
     {
       icon: <AiFillMessage className="text-xl mr-3 rounded-full " />,
@@ -100,6 +108,16 @@ const Sidebar = ({ hamb, setHamb }) => {
       icon: <BsFillCartFill className="text-xl mr-3" />,
       link: "/refer",
       name: "Refer and Earn",
+    },
+    {
+      icon: <RiSecurePaymentLine className="text-xl mr-3"  size={50}/>,
+      link: "/shiprocketcredentials",
+      name: "Shiprocket Credentials",
+    },
+    {
+      icon: <RiSecurePaymentLine className="text-xl mr-3"  size={50}/>,
+      link: "/payment_gateway",
+      name: "Payment gateway Credentials",
     },
     // {
     //   icon: <BsFillCartFill className="text-xl mr-3" />,

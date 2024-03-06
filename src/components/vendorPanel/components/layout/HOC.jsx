@@ -27,7 +27,7 @@ const HOC = (Wcomponenet) => {
             }
           >
             <Navbar hamb={hamb} setHamb={setHamb} />
-            <div className="my-6 text-[#000] h-[87%] wcomp overflow-y-auto">
+            <div className="my-6 text-[#000] h-[87%] wcomp overflow-y-auto overflow-x-auto">
               <Wcomponenet />
             </div>
           </div>

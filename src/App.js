@@ -5,7 +5,8 @@ import MSG from "./components/vendorPanel/components/pages/Message/Message";
 import VendorLogin from "./components/vendorPanel/components/forms/VendorLogin";
 import VendorDashboard from "./components/vendorPanel/components/pages/VendorDashboard";
 import Users from "./components/vendorPanel/components/pages/Users/Users";
-import Product from "./components/vendorPanel/components/pages/Products/Product";
+import PendingProduct from "./components/vendorPanel/components/pages/Products/PendingProduct";
+import ApprovedProduct from "./components/vendorPanel/components/pages/Products/ApprovedProduct";
 import Category from "./components/vendorPanel/components/pages/Category/Category";
 import Order from "./components/vendorPanel/components/pages/Orders/Order";
 import Ban from "./components/vendorPanel/components/pages/Ban/Ban";
@@ -34,6 +35,8 @@ import NewResigter from "./components/forms/NewResigter";
 import PendingVendor from "./components/vendorPanel/components/pages/PendingVendor/PendingVendor";
 import AproveVendor from "./components/vendorPanel/components/pages/ApproveVendor/AproveVendor";
 import UpdateAdminProFile from "./components/vendorPanel/components/forms/UpdateAdminProFile";
+import Payment_gateway from "./components/vendorPanel/components/pages/Gateway_Payment/Payment_gateway";
+import ShiprocketCredentials from "./components/vendorPanel/components/pages/Shiprocket Credentials/ShiprocketCredentials";
 
 function App() {
   return (
@@ -54,7 +57,8 @@ function App() {
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/refer" element={<Refer />} />
-        <Route path="/product" element={<Product />} />
+        <Route path="/pendingproduct" element={<PendingProduct />} />
+        <Route path="/approvegproduct" element={<ApprovedProduct />} />
         <Route path="/msg" element={<MSG />} />
         <Route path="/dis" element={<Coupon />} />
         <Route path="/complaint" element={<Complaint />} />
@@ -71,6 +75,8 @@ function App() {
         <Route path="/vendorCategory" element={<Vendor_Category />} />
         <Route path="/vendorSubCategory" element={<Vendor_sub_category />} />
         <Route path="/VendorOrder" element={<Vendor_Order />} />
+        <Route path="/payment_gateway" element={<Payment_gateway />} />
+        <Route path="/shiprocketcredentials" element={<ShiprocketCredentials />} />
         <Route
           path="/vendor_single_order_page/:id"
           element={<Single_order_product />}
