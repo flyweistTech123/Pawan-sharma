@@ -144,7 +144,11 @@ const MSG = () => {
               <Form.Label>Type</Form.Label>
               <Form.Select
                 aria-label="Default select example"
-                onChange={(e) => setSendTo(e.target.value)}
+                onChange={(e) => {
+                  setSendTo(e.target.value);
+                  // Reset userId when user type changes
+                  setUserId("");
+                }}
                 value={sendTo}
               >
                 <option>Select the Type of user</option>
@@ -155,22 +159,22 @@ const MSG = () => {
                 ))}
               </Form.Select>
             </Form.Group>
-
             {total === "SINGLE" && (
               <Form.Group className="mb-3">
-                <Form.Label>Users</Form.Label>
+                <Form.Label>Select the {sendTo}</Form.Label>
                 <Form.Select
                   aria-label="Default select example"
                   onChange={(e) => setUserId(e.target.value)}
                   value={userId}
                 >
-                  <option>Select the individual User</option>
-                  {user?.map((i, index) => (
-                    <option value={i._id} key={index}>
-                      {" "}
-                      {i.userName}{" "}
-                    </option>
-                  ))}
+                  <option>Select the individual {sendTo}</option>
+                  {user
+                    .filter((u) => u.userType === sendTo)
+                    .map((user, index) => (
+                      <option value={user._id} key={index}>
+                        {user.userName}
+                      </option>
+                    ))}
                 </Form.Select>
               </Form.Group>
             )}

@@ -141,7 +141,7 @@ const PendingVendor = () => {
                   <td>{i.mobileNumber}</td>
                   <td>{i.email}</td>
                   <td>{i.userType}</td>
-                  <td>{i.isVendorVerified ? "True" : "False"}</td>
+                  <td>{i.isVendorVerified ? "active" : "Deactivate"}</td>
                   <td>
                     <div onClick={() => handle_updateVendor(i._id)}>
                       <i

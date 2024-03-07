@@ -37,7 +37,7 @@ const AproveVendor = () => {
     const [username, setUserName] = useState("");
     const [mobilenumber, setMobileNumber] = useState("");
     const [email, setEmail] = useState("");
-    const [isActive, setIsActive] = useState(false); // State for radio button
+    const [isActive, setIsActive] = useState("");
 
     useEffect(() => {
       const fetchUsersDetails = async () => {
@@ -47,11 +47,11 @@ const AproveVendor = () => {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           });
-          const { userName, mobileNumber, email, isVerified } = response.data.data;
+          const { userName, mobileNumber, email, isVendorVerified } = response.data.data;
           setUserName(userName);
           setEmail(email);
           setMobileNumber(mobileNumber);
-          setIsActive(isVerified); // Set isActive based on isVerified
+          setIsActive(isVendorVerified);
         } catch (error) {
           console.error('Error fetching User details:', error);
         }
@@ -59,21 +59,30 @@ const AproveVendor = () => {
       fetchUsersDetails();
     }, [userId]);
 
-    const handlePutRequest = async (e) => {
-      e.preventDefault();
-      const data = {
-        userName: username,
-        mobileNumber: mobilenumber,
-        email: email,
-        isVerified: isActive, // Include isActive in the request data
-      }
-
+    const handleApproveAndProfileUpdate = async () => {
       try {
+        await axios.put(`${Baseurl}api/admin/approve-vendor/${userId}`,
+        {
+          isVendorVerified: isActive,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        const data = {
+          userName: username,
+          mobileNumber: mobilenumber,
+          email: email,
+        };
+
         const response = await axios.put(`${Baseurl}api/admin/update/${userId}`, data, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
+
         showMsg("Success", "Vendor Updated", "success");
         setModalShow(false);
         fetchData();
@@ -82,6 +91,7 @@ const AproveVendor = () => {
         toast.error("Error updating Vendor")
       }
     }
+
 
     return (
       <Modal
@@ -96,7 +106,7 @@ const AproveVendor = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handlePutRequest}>
+          <Form onSubmit={handleApproveAndProfileUpdate}>
             <Form.Group className="mb-3">
               <Form.Label>Name</Form.Label>
               <Form.Control
@@ -148,7 +158,7 @@ const AproveVendor = () => {
             </Form.Group>
 
             <Button variant="outline-success" type="submit">
-            Update
+              Update
             </Button>
           </Form>
         </Modal.Body>
