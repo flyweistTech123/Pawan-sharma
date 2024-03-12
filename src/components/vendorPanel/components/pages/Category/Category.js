@@ -8,6 +8,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { Baseurl, showMsg } from "../../../../../Baseurl";
+import styledRtl from "daisyui/dist/styled.rtl";
 
 const Category = () => {
   const [modalShow, setModalShow] = React.useState(false);
@@ -36,6 +37,7 @@ const Category = () => {
   function MyVerticallyCenteredModal(props) {
     const [image, setImage] = useState("");
     const [desc, setDesc] = useState("");
+    const [status, setStatus] = useState("")
 
 
     useEffect(() => {
@@ -46,9 +48,10 @@ const Category = () => {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           });
-          const { name, image } = response.data.data;
+          const { name, image, status } = response.data.data;
           setImage(image);
           setDesc(name);
+          setStatus(status)
         } catch (error) {
           console.error('Error fetching Category details:', error);
         }
@@ -59,6 +62,7 @@ const Category = () => {
     const fd = new FormData();
     fd.append("image", image);
     fd.append("name", desc);
+    fd.append("status", status);
 
     const postData = async (e) => {
       e.preventDefault();
@@ -137,7 +141,25 @@ const Category = () => {
                 onChange={(e) => setDesc(e.target.value)}
               />
             </Form.Group>
-
+            <Form.Group className="mb-3">
+              <Form.Label>Status</Form.Label>
+              <div style={{ display: 'flex', gap: '20px' }}>
+                <Form.Check
+                  type="radio"
+                  label="On"
+                  name="status"
+                  checked={status}
+                  onChange={() => setStatus(true)}
+                />
+                <Form.Check
+                  type="radio"
+                  label="Off"
+                  name="status"
+                  checked={!status}
+                  onChange={() => setStatus(false)}
+                />
+              </div>
+            </Form.Group>
             <Button variant="outline-success" type="submit">
               {edit ? "Update" : "Submit"}
             </Button>
@@ -193,6 +215,7 @@ const Category = () => {
               <tr>
                 <th>Category Image</th>
                 <th>Category Name</th>
+                <th>Status</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -207,6 +230,13 @@ const Category = () => {
                     />
                   </td>
                   <td> {i.name} </td>
+                  <td className={i.status ? "category120" : "category121"} >
+                    {i.status ? (
+                      <button>On</button>
+                    ) : (
+                      <button>Off</button>
+                    )}
+                  </td>
                   <td className="user121">
                     <i
                       className="fa-solid fa-trash"
@@ -221,6 +251,7 @@ const Category = () => {
                       }}
                     ></i>
                   </td>
+
                 </tr>
               ))}
             </tbody>

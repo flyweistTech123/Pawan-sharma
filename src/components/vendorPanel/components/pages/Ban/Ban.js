@@ -5,12 +5,17 @@ import HOC from "../../layout/HOC";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import Table from "react-bootstrap/Table";
 import axios from "axios";
+import { toast } from "react-toastify";
 import { Baseurl, showMsg } from "../../../../../Baseurl";
 
 const Ban = () => {
   const [modalShow, setModalShow] = React.useState(false);
+  const [edit, setEdit] = useState(false);
   const [data, setData] = useState([]);
+  const [bannerId, setBannerId] = useState('')
+
 
   const fetchData = async () => {
     try {
@@ -19,8 +24,8 @@ const Ban = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setData(data);
-      console.log(data, "data offers");
+      setData(data.data);
+      // console.log(data, "data offers");
     } catch (e) {
       console.log(e);
     }
@@ -48,6 +53,7 @@ const Ban = () => {
   function MyVerticallyCenteredModal(props) {
     const [image, setImage] = useState("");
     const [desc, setDesc] = useState("");
+    const [category, setCategory] = useState("");
     const [product, setProduct] = useState("");
     const [title, setTitle] = useState("");
     const [code, setCode] = useState("");
@@ -55,17 +61,48 @@ const Ban = () => {
     const [validFrom, setValidForm] = useState("");
     const [validTo, setValidTo] = useState("");
 
+
+    useEffect(() => {
+      const fetchBannersDetails = async () => {
+        try {
+          const response = await axios.get(`${Baseurl}/api/admin/offers/${bannerId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          const { title, image, product, description, code, discountPercentage, validFrom, validTo, category } = response.data.data;
+          setTitle(title);
+          console.log(validTo, "hogi rhi ye bhajj")
+          setImage(image);
+          setProduct(product);
+          setDesc(description);
+          setCode(code);
+          setDiscountPercentage(discountPercentage);
+          setValidForm(validFrom);
+          setValidTo(validTo);
+          setCategory(category)
+        } catch (error) {
+          console.error('Error fetching Banner details:', error);
+        }
+      };
+      fetchBannersDetails();
+    }, [bannerId]);
+
+
+    const formdata = new FormData();
+    formdata.append("product", product);
+    formdata.append("category", category);
+    formdata.append("title", title);
+    formdata.append("description", desc);
+    formdata.append("code", code);
+    formdata.append("discountPercentage", discountPercentage);
+    formdata.append("validFrom", validFrom);
+    formdata.append("validTo", validTo);
+    formdata.append("image", image);
+
     const postData = async (e) => {
       e.preventDefault();
-      const formdata = new FormData();
-      formdata.append("product", product);
-      formdata.append("title", title);
-      formdata.append("description", desc);
-      formdata.append("code", code);
-      formdata.append("discountPercentage", discountPercentage);
-      formdata.append("validFrom", validFrom);
-      formdata.append("validTo", validTo);
-      formdata.append("image", image);
+
 
       try {
         const { data } = await axios.post(
@@ -85,6 +122,24 @@ const Ban = () => {
       }
     };
 
+
+    const handlePutRequest = async (e) => {
+      e.preventDefault();
+      try {
+        const response = await axios.put(`${Baseurl}api/admin/offers/${bannerId}`, formdata, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        showMsg("Success", "Banner Updated", "success");
+        setModalShow(false);
+        fetchData();
+      } catch (error) {
+        console.error('Error to updating Banner:', error)
+        toast.error("Error to updating Banner")
+      }
+    }
+
     const [showProduct, setShowProduct] = useState([]);
     const fetchData = async () => {
       try {
@@ -98,10 +153,25 @@ const Ban = () => {
         console.log(e);
       }
     };
+    const [categoryP, setP] = useState([]);
+    const fetchCategory = async () => {
+      try {
+        const { data } = await axios.get(`${Baseurl}api/admin/categories`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setP(data.categories);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
 
     useEffect(() => {
       if (props.show === true) {
         fetchData();
+        fetchCategory();
       }
     }, [props]);
 
@@ -114,16 +184,25 @@ const Ban = () => {
       >
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">
-            Add Banner
+            {edit ? "Edit Banner" : "Add Banner"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {image && (
+            <div>
+              <img
+                src={image instanceof File ? URL.createObjectURL(image) : image}
+                alt="Category Preview"
+                style={{ width: "200px" }}
+              />
+            </div>
+          )}
           <Form
             style={{
               color: "black",
               margin: "auto",
             }}
-            onSubmit={postData}
+            onSubmit={edit ? handlePutRequest : postData}
           >
             <Form.Group className="mb-3" controlId="formBasicEmail">
               <Form.Label>Title</Form.Label>
@@ -134,6 +213,22 @@ const Ban = () => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Category</Form.Label>
+              <Form.Select
+                aria-label="Select category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option>Open this select menu</option>
+                {categoryP?.map((i, index) => (
+                  <option value={i._id} key={index}>
+                    {" "}
+                    {i.name}{" "}
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Product</Form.Label>
@@ -209,7 +304,7 @@ const Ban = () => {
             </Form.Group>
 
             <Button variant="outline-success" type="submit">
-              Submit
+              {edit ? "Update" : "Submit"}
             </Button>
           </Form>
         </Modal.Body>
@@ -224,44 +319,76 @@ const Ban = () => {
         show={modalShow}
         onHide={() => setModalShow(false)}
       />
-
       <section>
-        <div className="pb-4 Heading_Container w-full flex justify-between items-center ">
+        <div className="pb-4 sticky top-0  w-full flex justify-between items-center Heading_Container">
           <span className="tracking-widest text-slate-900 font-semibold uppercase ">
             All Banner
           </span>
           <button
             onClick={() => {
+              setEdit(false);
               setModalShow(true);
+              setBannerId(null)
             }}
           >
             Create New
           </button>
         </div>
-      </section>
 
-      <section className="main-card--container" style={{ marginBottom: "10%" }}>
-        {data?.data?.map((i) => {
-          return (
-            <>
-              <div className="three-container">
-                <img
-                  src={i.image}
-                  style={{ width: "400px", height: "200px" }}
-                  alt={i.desc}
-                />
-                <p>{i.desc}</p>
+        <div className="table-component">
+          <Table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Image</th>
+                {/* <th>product</th>
+                <th>category</th> */}
+                {/* <th>Description</th> */}
+                <th>Code</th>
+                <th>Discount Percentage</th>
+                <th>Valid From</th>
+                <th>Valid To</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.map((i, index) => (
+                <tr key={index}>
+                  <td> {i.title} </td>
+                  <td>
+                    <img
+                      src={i.image}
+                      alt="bannerImage"
+                      style={{ width: "100px" }}
+                    />
+                  </td>
+                  {/* <td> {i.product} </td> */}
+                  {/* <td> {i.category} </td> */}
+                  {/* <td> {i.description} </td> */}
+                  <td> {i.code} </td>
+                  <td> {i.discountPercentage}%</td>
+                  <td> {i.validFrom} </td>
+                  <td> {i.validTo} </td>
+                  <td className="user121">
+                    <i
+                      className="fa-solid fa-trash"
+                      onClick={() => deleteData(i._id)}
+                    ></i>
+                    <i
+                      className="fa-solid fa-edit"
+                      onClick={() => {
+                        setBannerId(i._id);
+                        setModalShow(true);
+                        setEdit(true)
 
-                <button
-                  style={{ width: "100%" }}
-                  onClick={() => deleteData(i._id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </>
-          );
-        })}
+                      }}
+                    ></i>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
       </section>
     </>
   );

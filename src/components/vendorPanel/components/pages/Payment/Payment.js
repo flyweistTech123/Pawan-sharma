@@ -8,7 +8,6 @@ import { useState } from "react";
 
 import axios from "axios";
 import { Baseurl, showMsg } from "../../../../../Baseurl";
-import { Link } from "react-router-dom";
 
 const Payment = () => {
   const [modalShow, setModalShow] = React.useState(false);
@@ -24,15 +23,12 @@ const Payment = () => {
         },
       });
       setData(data.data);
-      console.log(data.data);
     } catch (e) {
       console.log(e);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+
 
   function MyVerticallyCenteredModal(props) {
     const [status, setStatus] = useState("");
@@ -56,6 +52,7 @@ const Payment = () => {
         console.log(e);
       }
     };
+
     return (
       <Modal
         {...props}
@@ -96,19 +93,7 @@ const Payment = () => {
     );
   }
 
-  const deleteData = async (id) => {
-    try {
-      const { data } = await axios.delete(`${Baseurl}api/admin/payment/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      fetchData();
-      showMsg("Success", "Payment Removed !", "success");
-    } catch (e) {
-      console.log(e);
-    }
-  };
+
 
   const handleDownloadStatus = (pdfLink) => {
     const link = document.createElement("a");
@@ -128,6 +113,10 @@ const Payment = () => {
     // Remove the link from the document body
     document.body.removeChild(link);
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <>
@@ -156,19 +145,19 @@ const Payment = () => {
             </thead>
             <tbody>
               {data?.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.order.user ? item.order.user : "N/A"}</td>
+                <tr key={item._id}>
+                  {/* <td>{item?.order?.user ? item.order.user : "N/A"}</td> */}
                   <td>
                     {/* Displaying order details */}
-                    {item.order.products.map((product, idx) => (
+                    {item?.order?.products?.map((product, idx) => (
                       <div key={idx}>
-                        {product.product}
+                        {product?.product}
                       </div>
                     ))}
                   </td>
-                  <td>{item.amount}</td>
-                  <td>{item.paymentMethod}</td>
-                  <td>{item.order.paymentStatus}</td>
+                  <td>{item?.amount}</td>
+                  <td>{item?.paymentMethod}</td>
+                  <td>{item?.order.paymentStatus}</td>
                   <td>
                     <Button onClick={() => handleDownloadStatus(item.pdfLink)}>
                       Download Invoice

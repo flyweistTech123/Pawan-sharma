@@ -41,6 +41,8 @@ const Sub = () => {
     const [desc, setDesc] = useState("");
     const [category, setCategory] = useState("");
     const [categoryP, setP] = useState([]);
+    const [status, setStatus] = useState("")
+
 
 
     useEffect(() => {
@@ -52,26 +54,27 @@ const Sub = () => {
             },
           });
           console.log(response);
-          const { name, image, category } = response.data.data;
+          const { name, image, category, status } = response.data.data;
           setImage(image);
           setDesc(name);
           setCategory(category)
+          setStatus(status)
         } catch (error) {
           console.error('Error fetching sub Category details:', error);
         }
       };
       fetchSubCategorysDetails();
     }, [CategoryId]);
-  
-  
 
-  
+
+
+
 
     const fd = new FormData();
     fd.append("image", image);
     fd.append("name", desc);
     fd.append("category", category);
-
+    fd.append("status", status);
     const postData = async (e) => {
       e.preventDefault();
       try {
@@ -190,6 +193,26 @@ const Sub = () => {
               />
             </Form.Group>
 
+            <Form.Group className="mb-3">
+              <Form.Label>Status</Form.Label>
+              <div style={{ display: 'flex', gap: '20px' }}>
+                <Form.Check
+                  type="radio"
+                  label="On"
+                  name="status"
+                  checked={status}
+                  onChange={() => setStatus(true)}
+                />
+                <Form.Check
+                  type="radio"
+                  label="Off"
+                  name="status"
+                  checked={!status}
+                  onChange={() => setStatus(false)}
+                />
+              </div>
+            </Form.Group>
+
             <Button variant="outline-success" type="submit">
               {edit ? "Update" : "Submit"}
             </Button>
@@ -247,6 +270,7 @@ const Sub = () => {
               <tr>
                 <th>Sub Category Image</th>
                 <th>Sub Category Name</th>
+                <th>Status</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -261,6 +285,13 @@ const Sub = () => {
                     />
                   </td>
                   <td> {i.name} </td>
+                  <td className={i.status ? "category120" : "category121"} >
+                    {i.status ? (
+                      <button>On</button>
+                    ) : (
+                      <button>Off</button>
+                    )}
+                  </td>
                   <td className="user121">
                     <i
                       className="fa-solid fa-trash"
