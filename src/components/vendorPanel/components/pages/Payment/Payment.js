@@ -144,22 +144,22 @@ const Payment = () => {
               </tr>
             </thead>
             <tbody>
-              {data?.map((item, index) => (
-                <tr key={item._id}>
+              {data?.map((i, index) => (
+                <tr key={index}>
                   {/* <td>{item?.order?.user ? item.order.user : "N/A"}</td> */}
                   <td>
                     {/* Displaying order details */}
-                    {item?.order?.products?.map((product, idx) => (
-                      <div key={idx}>
+                    {i?.order?.products?.map((product, idx) => (
+                      <div key={id}>
                         {product?.product}
                       </div>
                     ))}
                   </td>
-                  <td>{item?.amount}</td>
-                  <td>{item?.paymentMethod}</td>
-                  <td>{item?.order.paymentStatus}</td>
+                  <td>{i?.amount}</td>
+                  <td>{i?.paymentMethod}</td>
+                  <td>{i?.order.paymentStatus}</td>
                   <td>
-                    <Button onClick={() => handleDownloadStatus(item.pdfLink)}>
+                    <Button onClick={() => handleDownloadStatus(i.pdfLink)}>
                       Download Invoice
                     </Button>
                   </td>

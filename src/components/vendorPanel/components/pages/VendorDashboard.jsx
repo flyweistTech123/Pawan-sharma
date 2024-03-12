@@ -79,7 +79,7 @@ const VendorDashboard = () => {
     {
       progress: "bg-green-400",
       title: "All Products",
-      link: "/product",
+      link: "/approvegproduct",
       number: user?.products,
       icon: <MdOutlineLibraryBooks className="text-2xl text-[#0D99FF]" />,
     },

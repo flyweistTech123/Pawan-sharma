@@ -466,6 +466,38 @@ const ApprovedProduct = () => {
       console.log(e);
     }
   };
+  const handleDownloadExcel = async () => {
+    try {
+      const response = await axios.get(`${Baseurl}api/admin/export/product`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        responseType: 'blob', // Receive binary data
+      });
+
+      // Create a temporary URL for the blob object
+      const url = window.URL.createObjectURL(response.data);
+
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Set the download attribute with the desired file name
+      link.setAttribute('download', 'Product.xlsx');
+
+      // Append the link to the document body
+      document.body.appendChild(link);
+
+      // Trigger a click on the link to start the download
+      link.click();
+
+      // Remove the link from the document body after download
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading Excel file:", error);
+    }
+  };
+
 
   useEffect(() => {
     fetchData();
@@ -491,6 +523,7 @@ const ApprovedProduct = () => {
           >
             Add Product
           </button>
+          <Button onClick={handleDownloadExcel}>Download Excel</Button>
         </div>
 
         <div className="table-component">
