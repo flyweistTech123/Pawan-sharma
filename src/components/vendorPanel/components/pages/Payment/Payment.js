@@ -14,20 +14,38 @@ const Payment = () => {
   const [edit, setEdit] = useState(false);
   const [data, setData] = useState([]);
   const [id, setId] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all"); // State for filter status
+
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get(`${Baseurl}api/admin/payment`, {
+      const response = await axios.get(`${Baseurl}api/admin/payment`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setData(data.data);
-    } catch (e) {
-      console.log(e);
+      setData(response?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching payment data:", error);
     }
   };
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+
+  const handleFilterChange = (e) => {
+    setFilterStatus(e.target.value);
+  };
+
+  const filteredData = data.filter((item) => {
+    if (filterStatus === "all") {
+      return true; // Show all data
+    } else {
+      return item?.order?.paymentStatus === filterStatus;
+    }
+  });
 
 
   function MyVerticallyCenteredModal(props) {
@@ -95,6 +113,39 @@ const Payment = () => {
 
 
 
+  const handleDownloadExcel = async () => {
+    try {
+      const response = await axios.get(`${Baseurl}api/admin/export/payment`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        responseType: 'blob', // Receive binary data
+      });
+
+      // Create a temporary URL for the blob object
+      const url = window.URL.createObjectURL(response.data);
+
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Set the download attribute with the desired file name
+      link.setAttribute('download', 'Transactions.xlsx');
+
+      // Append the link to the document body
+      document.body.appendChild(link);
+
+      // Trigger a click on the link to start the download
+      link.click();
+
+      // Remove the link from the document body after download
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading Excel file:", error);
+    }
+  };
+
+
   const handleDownloadStatus = (pdfLink) => {
     const link = document.createElement("a");
 
@@ -114,9 +165,8 @@ const Payment = () => {
     document.body.removeChild(link);
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+
+
 
   return (
     <>
@@ -129,6 +179,16 @@ const Payment = () => {
           <span className="tracking-widest text-slate-900 font-semibold uppercase ">
             All Payments
           </span>
+          <div>
+            {/* Filter dropdown */}
+            <Form.Select onChange={handleFilterChange} value={filterStatus}>
+              <option value="all">All</option>
+              <option value="Pending">Pending</option>
+              <option value="Completed">Completed</option>
+              <option value="Failed">Failed</option>
+            </Form.Select>
+          </div>
+          <Button onClick={handleDownloadExcel}>Download Excel</Button>
         </div>
 
         <div className="table-component">
@@ -144,14 +204,14 @@ const Payment = () => {
               </tr>
             </thead>
             <tbody>
-              {data?.map((i, index) => (
+              {filteredData?.map((i, index) => (
                 <tr key={index}>
-                  {/* <td>{item?.order?.user ? item.order.user : "N/A"}</td> */}
+                  <td>{i?.order?.user?.userName ? i?.order?.user?.userName : "N/A"}</td>
                   <td>
                     {/* Displaying order details */}
                     {i?.order?.products?.map((product, idx) => (
-                      <div key={id}>
-                        {product?.product}
+                      <div key={idx}>
+                        {product?.productName}
                       </div>
                     ))}
                   </td>

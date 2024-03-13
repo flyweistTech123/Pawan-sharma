@@ -37,6 +37,8 @@ import AproveVendor from "./components/vendorPanel/components/pages/ApproveVendo
 import UpdateAdminProFile from "./components/vendorPanel/components/forms/UpdateAdminProFile";
 import Payment_gateway from "./components/vendorPanel/components/pages/Gateway_Payment/Payment_gateway";
 import ShiprocketCredentials from "./components/vendorPanel/components/pages/Shiprocket Credentials/ShiprocketCredentials";
+import Complainttickets from "./components/vendorPanel/components/pages/Complaint tickets/Complainttickets";
+import RefundOrders from "./components/vendorPanel/components/pages/Refund Orders/RefundOrders";
 
 function App() {
   return (
@@ -77,6 +79,8 @@ function App() {
         <Route path="/VendorOrder" element={<Vendor_Order />} />
         <Route path="/payment_gateway" element={<Payment_gateway />} />
         <Route path="/shiprocketcredentials" element={<ShiprocketCredentials />} />
+        <Route path="/complainttickets" element={<Complainttickets />} />
+        <Route path="/refundorders" element={<RefundOrders />} />
         <Route
           path="/vendor_single_order_page/:id"
           element={<Single_order_product />}

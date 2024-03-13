@@ -14,6 +14,7 @@ const VendorDashboard = () => {
   const [product, setProduct] = useState(0);
   const [order, setOrder] = useState(0);
   const [cat, setCat] = useState(0);
+  const [refundOrder, setRefundOrder] = useState(0);
 
   const fetchUser = async () => {
     try {
@@ -50,6 +51,19 @@ const VendorDashboard = () => {
     }
   };
 
+  const fetchRefundOrder = async () => {
+    try {
+      const { data } = await axios.get(`${Baseurl}api/admin/refund-orders`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setRefundOrder(data?.data?.length);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const fetchcategory = async () => {
     try {
       const { data } = await axios.get(
@@ -65,6 +79,7 @@ const VendorDashboard = () => {
     fetchUser();
     fetchProduct();
     fetchOrder();
+    fetchRefundOrder();
     fetchcategory();
   }, []);
 
@@ -88,6 +103,13 @@ const VendorDashboard = () => {
       title: "All Orders",
       link: "/order",
       number: user?.orders,
+      icon: <MdDashboardCustomize className="text-2xl text-[#0D99FF]" />,
+    },
+    {
+      progress: "bg-yellow-400",
+      title: "All Refund Orders",
+      link: "/refundorders",
+      number: refundOrder,
       icon: <MdDashboardCustomize className="text-2xl text-[#0D99FF]" />,
     },
     {

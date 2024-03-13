@@ -16,48 +16,81 @@ const Order = () => {
   const [modalShow, setModalShow] = React.useState(false);
   const [modalShow1, setModalShow1] = React.useState(false);
   const [orderId, setOrderId] = useState('')
+  const [filterOption, setFilterOption] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterOption, setFilterOption] = useState('user');
-  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [allItems, setAllItems] = useState([]);
 
+  useEffect(() => {
+    getAllItems();
+  }, []);
 
-  const handleSearch = async () => {
+  const getAllItems = async () => {
     try {
-      const { data } = await axios.get(`${Baseurl}api/admin/order-search/search`, {
+      const usersResponse = await axios.get(`${Baseurl}api/admin/users`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        params: {
-          [filterOption]: searchQuery
-        }
       });
-      setFilteredOrders(data);
+      const vendorsResponse = await axios.get(`${Baseurl}api/admin/users`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const productsResponse = await axios.get(`${Baseurl}api/admin/products`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      // const users = usersResponse.data.users.filter(user => user.userType === 'User ');
+      // const vendors = vendorsResponse.data.users.filter(user => user.userType === 'Vendor');
+
+      setAllItems({
+        user: usersResponse.data.users.filter(user => user.userType === "User"),
+        vendor: vendorsResponse.data.users.filter(user => user.userType === "Vendor"),
+        product: productsResponse.data.products,
+      });
     } catch (error) {
-      console.error('Error searching orders:', error);
+      console.error('Error fetching data:', error);
     }
   };
 
 
-  const handleFilterChange = (e) => {
-    setFilterOption(e.target.value);
-    setSearchQuery('');
-    setFilteredOrders([]);
+
+
+
+  const handleFilterChange = (event) => {
+    setFilterOption(event.target.value);
   };
+
+  const handleItemClick = (itemId) => {
+    setSearchQuery(itemId);
+  };
+
 
 
 
   const fetchData = async () => {
     try {
-      const { data } = await axios.get(`${Baseurl}api/admin/order`, {
+      let url = `${Baseurl}/api/admin/order`; // Default URL for fetching all orders
+
+      // If filter option and search query are set, construct the URL with filter
+      if (filterOption && searchQuery) {
+        url = `${Baseurl}/api/admin/${filterOption}/order/${searchQuery}`;
+      }
+
+      const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setData(data);
-    } catch (e) {
-      console.log(e);
+      setData(response.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
     }
   };
+
+
 
   function OrderModal(props) {
     const [orderDetails, setOrderDetails] = useState(null);
@@ -236,10 +269,55 @@ const Order = () => {
     );
   }
 
+  const renderItemName = (item, filterOption) => {
+    switch (filterOption) {
+      case 'user':
+        return item.userName;
+      case 'vendor':
+        return item.userName;
+      case 'product':
+        return item.productName;
+      default:
+        return '';
+    }
+  };
+
+  const handleDownloadExcel = async () => {
+    try {
+      const response = await axios.get(`${Baseurl}api/admin/export/payment`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        responseType: 'blob', // Receive binary data
+      });
+
+      // Create a temporary URL for the blob object
+      const url = window.URL.createObjectURL(response.data);
+
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Set the download attribute with the desired file name
+      link.setAttribute('download', 'Order.xlsx');
+
+      // Append the link to the document body
+      document.body.appendChild(link);
+
+      // Trigger a click on the link to start the download
+      link.click();
+
+      // Remove the link from the document body after download
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading Excel file:", error);
+    }
+  };
+
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [searchQuery]);
 
   return (
     <>
@@ -257,23 +335,22 @@ const Order = () => {
           <span className="tracking-widest text-slate-900 font-semibold uppercase ">
             All Orders
           </span>
-
+          <Button onClick={handleDownloadExcel}>Download Excel</Button>
           <div className="selectsearch">
             <select value={filterOption} onChange={handleFilterChange}>
+              <option value="">Select Filter</option>
               <option value="user">User</option>
               <option value="vendor">Vendor</option>
               <option value="product">Product</option>
             </select>
-            {filterOption && (
-              <div className="searchbarb">
-                <IoSearch onClick={handleSearch} />
-                <input
-                  type="search"
-                  placeholder={`Search by ${filterOption}`}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
-                />
+            {filterOption && allItems[filterOption] && (
+              <div className="selectsearch">
+                <select onChange={(e) => handleItemClick(e.target.value)} className="mb-2">
+                  <option value="">Select {filterOption}</option>
+                  {allItems[filterOption].map((item) => (
+                    <option key={item._id} value={item._id}>{renderItemName(item, filterOption)}</option>
+                  ))}
+                </select>
               </div>
             )}
           </div>

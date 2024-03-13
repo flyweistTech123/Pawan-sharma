@@ -242,10 +242,11 @@ table {
 }
 
 .selectsearch select{
-  width: 120px;
+  width: auto;
   height: 30px;
   border: none;
   outline: none;
   padding-left: 20px;
   border-radius: 10px;
+  padding: 5px;
 }

@@ -12,6 +12,8 @@ import { AiFillMessage } from "react-icons/ai";
 import { FiImage } from "react-icons/fi";
 import { RiSecurePaymentLine } from "react-icons/ri";
 import { FaProductHunt, FaUserCircle } from "react-icons/fa";
+import { BiSupport } from "react-icons/bi";
+
 
 
 
@@ -96,6 +98,11 @@ const Sidebar = ({ hamb, setHamb }) => {
     },
     {
       icon: <BsFillCartFill className="text-xl mr-3" />,
+      link: "/refundorders",
+      name: "Refund Orders",
+    },
+    {
+      icon: <BsFillCartFill className="text-xl mr-3" />,
       link: "/payment",
       name: "Payment",
     },
@@ -104,10 +111,17 @@ const Sidebar = ({ hamb, setHamb }) => {
       link: "/wallet",
       name: "Wallet",
     },
+
     {
       icon: <BsFillCartFill className="text-xl mr-3" />,
       link: "/refer",
       name: "Refer and Earn",
+    },
+
+    {
+      icon: <BiSupport  className="text-xl mr-3" />,
+      link: "/complainttickets",
+      name: "Complaint tickets",
     },
     {
       icon: <RiSecurePaymentLine className="text-xl mr-3"  size={50}/>,
